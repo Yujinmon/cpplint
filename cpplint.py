@@ -3561,11 +3561,15 @@ def IsBlankLine(line):
 
 def CheckForNamespaceIndentation(filename, nesting_state, clean_lines, line,
                                  error):
+  # is_namespace_indent_item = (
+  #     len(nesting_state.stack) > 1 and
+  #     nesting_state.stack[-1].check_namespace_indentation and
+  #     isinstance(nesting_state.previous_stack_top, _NamespaceInfo) and
+  #     nesting_state.previous_stack_top == nesting_state.stack[-2])
   is_namespace_indent_item = (
-      len(nesting_state.stack) > 1 and
-      nesting_state.stack[-1].check_namespace_indentation and
-      isinstance(nesting_state.previous_stack_top, _NamespaceInfo) and
-      nesting_state.previous_stack_top == nesting_state.stack[-2])
+      len(nesting_state.stack) >= 1 and
+      (isinstance(nesting_state.stack[-1], _NamespaceInfo) or (isinstance(nesting_state.previous_stack_top, _NamespaceInfo)))
+      )
 
   if ShouldCheckNamespaceIndentation(nesting_state, is_namespace_indent_item,
                                      clean_lines.elided, line):
@@ -6324,10 +6328,19 @@ def IsBlockInNameSpace(nesting_state, is_forward_declaration):
       isinstance(nesting_state.stack[-1], _NamespaceInfo))
 
 
-  return (len(nesting_state.stack) > 1 and
-          nesting_state.stack[-1].check_namespace_indentation and
-          isinstance(nesting_state.stack[-2], _NamespaceInfo))
-
+  # return (len(nesting_state.stack) > 1 and
+  #         nesting_state.stack[-1].check_namespace_indentation and
+  #         isinstance(nesting_state.stack[-2], _NamespaceInfo))
+  if (len(nesting_state.stack) >= 1):
+    if (isinstance(nesting_state.stack[-1], _NamespaceInfo)):
+      return True
+    elif (len(nesting_state.stack) > 1 and 
+          isinstance(nesting_state.previous_stack_top, _NamespaceInfo) and
+          isinstance(nesting_state.stack[-2], _NamespaceInfo)):
+      return True
+    
+  return False
+  
 
 def ShouldCheckNamespaceIndentation(nesting_state, is_namespace_indent_item,
                                     raw_lines_no_comments, linenum):
