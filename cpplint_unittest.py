@@ -313,12 +313,15 @@ class CpplintTest(CpplintTestBase):
     results = self.GetNamespaceResults(lines)
     self.assertEqual(results, '')
 
-  def testStructInNamespace(self):
+  def testNestingInNamespace(self):
     lines = ['namespace Test {',
              'struct OuterClass {',
              '  struct NoFalsePositivesHere;',
              '  struct NoFalsePositivesHere member_variable;',
              '};',
+             'void foo() {',
+             '  const int no_positives_eh = 418;',
+             '}',
              '}  // namespace Test']
 
     results = self.GetNamespaceResults(lines)
